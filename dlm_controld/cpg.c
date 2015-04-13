@@ -1664,7 +1664,7 @@ static void process_cpg_lockspace(int ci)
 	}
 
 	error = cpg_dispatch(ls->cpg_handle, CS_DISPATCH_ALL);
-	if (error != CS_OK) {
+	if (error != CS_OK && error != CS_ERR_BAD_HANDLE) {
 		log_error("cpg_dispatch error %d", error);
 		return;
 	}

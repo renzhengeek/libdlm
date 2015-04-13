@@ -1871,7 +1871,7 @@ int set_protocol(void)
 			 */
 
 			error = cpg_dispatch(cpg_handle_daemon, CS_DISPATCH_ONE);
-			if (error != CS_OK)
+			if (error != CS_OK && error != CS_ERR_BAD_HANDLE)
 				log_error("daemon cpg_dispatch one error %d", error);
 		}
 		if (pollfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {
@@ -2181,7 +2181,7 @@ void process_cpg_daemon(int ci)
 	cs_error_t error;
 
 	error = cpg_dispatch(cpg_handle_daemon, CS_DISPATCH_ALL);
-	if (error != CS_OK)
+	if (error != CS_OK && error != CS_ERR_BAD_HANDLE)
 		log_error("daemon cpg_dispatch error %d", error);
 }
 
