@@ -102,10 +102,10 @@ $(LLT_TARGET): $(LLT_O)
 	ln -sf $(LLT_TARGET) $(LLT_SMAJOR)
 
 $(LIB_PC): $(LIB_PCIN)
-	cat $(LIB_PCIN) | sed -e 's#@PREFIX@#$(PREFIX)#g' > $@
+	cat $(LIB_PCIN) | sed -e 's#@PREFIX@#$(PREFIX)#g;s#@LIBDIR@#$(LIBDIR)#g' > $@
 
 $(LLT_PC): $(LLT_PCIN)
-	cat $(LIB_PCIN) | sed -e 's#@PREFIX@#$(PREFIX)#g' > $@
+	cat $(LIB_PCIN) | sed -e 's#@PREFIX@#$(PREFIX)#g;s#@LIBDIR@#$(LIBDIR)#g' > $@
 
 clean:
 	rm -f *.o *.so *.so.* *.a *.pc
