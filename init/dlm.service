@@ -1,6 +1,7 @@
 [Unit]
 Description=dlm control daemon
-After=syslog.target network.target corosync.service sys-kernel-config.mount
+Requires=corosync.service sys-kernel-config.mount
+After=corosync.service sys-kernel-config.mount
 
 [Service]
 OOMScoreAdjust=-1000
