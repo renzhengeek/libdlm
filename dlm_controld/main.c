@@ -925,7 +925,7 @@ void cluster_dead(int ci)
 	cluster_down = 1;
 }
 
-static void loop(void)
+static int loop(void)
 {
 	struct lockspace *ls;
 	int poll_timeout = -1;
@@ -1029,6 +1029,7 @@ static void loop(void)
 		rv = poll(pollfd, client_maxi + 1, poll_timeout);
 		if (rv == -1 && errno == EINTR) {
 			if (daemon_quit && list_empty(&lockspaces))
+				rv = 0;
 				goto out;
 			if (daemon_quit) {
 				log_error("shutdown ignored, active lockspaces");
@@ -1101,6 +1102,7 @@ static void loop(void)
 
 	list_for_each_entry(ls, &lockspaces, list)
 		log_error("abandoned lockspace %s", ls->name);
+	return rv;
 }
 
 static int lockfile(const char *dir, const char *name)
@@ -1594,7 +1596,7 @@ int main(int argc, char **argv)
 
 	fd = lockfile(RUNDIR, RUN_FILE_NAME);
 	if (fd < 0)
-		return fd;
+		return 1;
 
 	log_level(NULL, LOG_INFO, "dlm_controld %s started", RELEASE_VERSION);
 
@@ -1602,29 +1604,30 @@ int main(int argc, char **argv)
 	act.sa_handler = sigterm_handler;
 	rv = sigaction(SIGTERM, &act, NULL);
 	if (rv < 0)
-		return -rv;
+		goto out;
 	rv = sigaction(SIGINT, &act, NULL);
 	if (rv < 0)
-		return -rv;
+		goto out;
 
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = SIG_IGN;
 	rv = sigaction(SIGHUP, &act, NULL);
 	if (rv < 0)
-		return -rv;
+		goto out;
 
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = sigchld_handler;
 	act.sa_flags = SA_NOCLDSTOP;
 	rv = sigaction(SIGCHLD, &act, NULL);
 	if (rv < 0)
-		return -rv;
+		goto out;
 
 	/* set_scheduler(); */
 
-	loop();
+	rv = loop();
 
+ out:
 	unlink_lockfile(fd, RUNDIR, RUN_FILE_NAME);
-	return 0;
+	return rv < 0 ? 1 : 0;
 }
 
