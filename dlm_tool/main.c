@@ -691,6 +691,8 @@ static void print_lkb(char *line, struct rinfo *ri)
 		    &lkb.lvbseq,
 		    (unsigned long long *)&lkb.timestamp,
 		    (unsigned long long *)&lkb.time_bast);
+	if(rv == EOF)
+		perror("Error:");
 
 	ri->lkb_count++;
 
