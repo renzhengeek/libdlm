@@ -687,8 +687,12 @@ static int add_waiter(struct lockspace *ls, struct resource *r,
 static void write_result(struct lockspace *ls, struct dlm_plock_info *in,
 			 int rv)
 {
+	int rc;
+
 	in->rv = rv;
-	write(plock_device_fd, in, sizeof(struct dlm_plock_info));
+	rc = write(plock_device_fd, in, sizeof(struct dlm_plock_info));
+	if(rc < 0)
+		perror("write");
 }
 
 static void do_waiters(struct lockspace *ls, struct resource *r)
