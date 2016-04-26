@@ -1028,9 +1028,10 @@ static int loop(void)
 	for (;;) {
 		rv = poll(pollfd, client_maxi + 1, poll_timeout);
 		if (rv == -1 && errno == EINTR) {
-			if (daemon_quit && list_empty(&lockspaces))
+			if (daemon_quit && list_empty(&lockspaces)) {
 				rv = 0;
 				goto out;
+			}
 			if (daemon_quit) {
 				log_error("shutdown ignored, active lockspaces");
 				daemon_quit = 0;
