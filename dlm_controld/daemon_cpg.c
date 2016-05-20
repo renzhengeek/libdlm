@@ -118,6 +118,7 @@ static int zombie_count;
 
 static int fence_result_pid;
 static unsigned int fence_result_try;
+static int stateful_merge_wait; /* cluster is stuck in waiting for manual intervention */
 
 static void send_fence_result(int nodeid, int result, uint32_t flags, uint64_t walltime);
 static void send_fence_clear(int nodeid, int result, uint32_t flags, uint64_t walltime);
@@ -847,10 +848,14 @@ static void daemon_fence_work(void)
 
 		if ((clean_count >= merge_count) && !part_count && (low == our_nodeid))
 			kick_stateful_merge_members();
+		if ((clean_count < merge_count) && !part_count)
+			stateful_merge_wait = 1;
 
 		retry = 1;
 		goto out;
 	}
+	if (stateful_merge_wait)
+		stateful_merge_wait = 0;
 
 	/*
 	 * startup fencing
@@ -2382,7 +2387,8 @@ static int print_state_daemon(char *str)
 		 "fence_pid=%d "
 		 "fence_in_progress_unknown=%d "
 		 "zombie_count=%d "
-		 "monotime=%llu ",
+		 "monotime=%llu "
+		 "stateful_merge_wait=%d ",
 		 daemon_member_count,
 		 daemon_joined_count,
 		 daemon_remove_count,
@@ -2392,7 +2398,8 @@ static int print_state_daemon(char *str)
 		 daemon_fence_pid,
 		 fence_in_progress_unknown,
 		 zombie_count,
-		 (unsigned long long)monotime());
+		 (unsigned long long)monotime(),
+		 stateful_merge_wait);
 
 	return strlen(str) + 1;
 }
